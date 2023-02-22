@@ -11,7 +11,7 @@ header = ['Symbol', 'Date', 'Open', 'High', 'Low', 'Close', 'Pre_Close', 'Change
 
 class DataLoader(abc.ABC):
     @staticmethod
-    def load(self, db_conn, symbol, timestamp_col='Date', start_time=None, end_time=None) -> pd.DataFrame:
+    def load(db_conn, symbol, timestamp_col='Date', start_time=None, end_time=None) -> pd.DataFrame:
         # 查询数据
         with db_conn.cursor() as cursor:
             query = "SELECT daily.*, daily_basic.turnover_rate, daily_basic.turnover_rate_f, " \
