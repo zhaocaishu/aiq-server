@@ -6,7 +6,7 @@ import pandas as pd
 
 import mysql.connector
 
-from loader import DataLoader
+from ais.data.loader import DataLoader
 
 
 class Dataset(abc.ABC):

@@ -1,6 +1,6 @@
 from aiq.dataset.handler import Alpha158
 
-from data.dataset import Dataset
+from ais.data.dataset import Dataset
 
 
 if __name__ == '__main__':

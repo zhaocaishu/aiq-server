@@ -7,8 +7,8 @@ from aiq.dataset import Alpha158
 from aiq.models import XGBModel, LGBModel
 from aiq.utils.config import config as cfg
 
-from strategies.signal_strategy import TopkDropoutStrategy
-from data.dataset import Dataset
+from ais.strategies.signal_strategy import TopkDropoutStrategy
+from ais.data.dataset import Dataset
 
 
 app = Flask(__name__)
