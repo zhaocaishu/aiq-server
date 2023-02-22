@@ -34,6 +34,6 @@ class DataLoader(abc.ABC):
                 feature[1] = t_date[0:4] + '-' + t_date[4:6] + '-' + t_date[6:8]
                 features.append(feature)
 
-            df = pd.DataFrame(features, columns=self.header)
+            df = pd.DataFrame(features, columns=header)
             df = df.sort_values(by=timestamp_col, ascending=True)
             return df
