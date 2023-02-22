@@ -3,13 +3,14 @@ import abc
 import pandas as pd
 
 
-class DataLoader(abc.ABC):
-    def __init__(self):
-        self.header = ["Symbol", "Date", "Open", "High", "Low", "Close", "Pre_Close", "Change", "Pct_Chg", "Volume",
-                       "AMount", "Turnover_rate", "Turnover_rate_f", "Volume_ratio", "Pe", "Pe_ttm", 'Pb', 'Ps',
-                       'Ps_ttm', 'Dv_ratio', 'Dv_ttm', 'Total_share', 'Float_share', 'Free_share', 'Total_mv',
-                       'Circ_mv']
+header = ['Symbol', 'Date', 'Open', 'High', 'Low', 'Close', 'Pre_Close', 'Change', 'Pct_Chg', 'Volume',
+          'AMount', 'Turnover_rate', 'Turnover_rate_f', 'Volume_ratio', 'Pe', 'Pe_ttm', 'Pb', 'Ps',
+          'Ps_ttm', 'Dv_ratio', 'Dv_ttm', 'Total_share', 'Float_share', 'Free_share', 'Total_mv',
+          'Circ_mv']
 
+
+class DataLoader(abc.ABC):
+    @staticmethod
     def load(self, db_conn, symbol, timestamp_col='Date', start_time=None, end_time=None) -> pd.DataFrame:
         # 查询数据
         with db_conn.cursor() as cursor:

@@ -43,7 +43,7 @@ class Dataset(abc.ABC):
             if handler is not None:
                 df = handler.fetch(df)
 
-            df = df.iloc[-1]
+            df = df.iloc[-1:]
 
             df_list.append(df)
         # concat and reset index
@@ -59,11 +59,11 @@ class Dataset(abc.ABC):
         symbols = []
         with self.connection.cursor() as cursor:
             # 查询指数内的股票代码
-            query = "SELECT DISTINCT ts_code FROM ts_idx_index_weight WHERE index_code=%s" % instruments
+            query = "SELECT DISTINCT(ts_code) FROM ts_idx_index_weight WHERE index_code=%s" % instruments
             cursor.execute(query)
             for row in cursor:
                 list_row = list(row)
-                self.symbols.append(list_row[0])
+                symbols.append(list_row[0])
         return symbols
 
     def to_dataframe(self):
