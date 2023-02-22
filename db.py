@@ -14,6 +14,11 @@ class DBManager(object):
                        "AMount", "Turnover_rate", "Turnover_rate_f", "Volume_ratio", "Pe", "Pe_ttm", 'Pb', 'Ps',
                        'Ps_ttm', 'Dv_ratio', 'Dv_ttm', 'Total_share', 'Float_share', 'Free_share', 'Total_mv',
                        'Circ_mv']
+        self._codes = []
+
+    @property
+    def codes(self):
+        return self._codes
 
     def fetch_data(self, cur_date):
         # 从数据库导出数据
@@ -23,16 +28,15 @@ class DBManager(object):
 
             cursor.execute(query)
 
-            codes = []
             for row in cursor:
                 list_row = list(row)
-                codes.append(list_row[0])
+                self._codes.append(list_row[0])
 
             # 查询股票代码在时间范围内的特征
             begin_date = datetime.datetime.strftime(
                 datetime.datetime.strptime(cur_date, '%Y-%m-%d') - datetime.timedelta(days=60), '%Y-%m-%d')
             end_date = cur_date
-            for code in codes:
+            for code in self._codes:
                 # 查询数据
                 query = "SELECT daily.*, daily_basic.turnover_rate, daily_basic.turnover_rate_f, " \
                         "daily_basic.volume_ratio, daily_basic.pe, daily_basic.pe_ttm, " \
