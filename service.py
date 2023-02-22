@@ -43,13 +43,14 @@ def predict(date):
     start_time = datetime.datetime.strftime(
         datetime.datetime.strptime(date, '%Y-%m-%d') - datetime.timedelta(days=60), '%Y-%m-%d')
     end_time = date
-
     dataset = Dataset('000300.SH', start_time=start_time, end_time=end_time, min_periods=30,
                       handler=handler, shuffle=False)
+
+    # predict
     prediction_result = get_prediction(dataset)
 
+    # result
     buy_order_list, keep_order_list, sell_order_list = strategy.generate_trade_decision(prediction_result)
-
     response = {'DATE': date, 'BUY': buy_order_list, 'SELL': sell_order_list}
     return json.dumps(response)
 
