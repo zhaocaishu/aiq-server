@@ -6,7 +6,7 @@ import pandas as pd
 
 import mysql.connector
 
-from .loader import DataLoader
+from loader import DataLoader
 
 
 class Dataset(abc.ABC):
@@ -15,13 +15,13 @@ class Dataset(abc.ABC):
     """
 
     def __init__(
-            self,
-            instruments,
-            start_time=None,
-            end_time=None,
-            min_periods=30,
-            handler=None,
-            shuffle=False
+        self,
+        instruments,
+        start_time=None,
+        end_time=None,
+        min_periods=30,
+        handler=None,
+        shuffle=False
     ):
         self.connection = mysql.connector.connect(host='127.0.0.1', user='zcs', passwd='mydaydayup2023!',
                                                   database="stock_info")
@@ -42,6 +42,8 @@ class Dataset(abc.ABC):
             # extract ticker factors
             if handler is not None:
                 df = handler.fetch(df)
+
+            df = df.iloc[-1]
 
             df_list.append(df)
         # concat and reset index
