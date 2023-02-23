@@ -15,22 +15,24 @@ class Dataset(abc.ABC):
     """
 
     def __init__(
-        self,
-        instruments,
-        start_time=None,
-        end_time=None,
-        min_periods=30,
-        handler=None,
-        shuffle=False
+            self,
+            instruments,
+            start_time=None,
+            end_time=None,
+            min_periods=60,
+            handler=None,
+            shuffle=False
     ):
         self.connection = mysql.connector.connect(host='127.0.0.1', user='zcs', passwd='mydaydayup2023!',
                                                   database="stock_info")
 
-        self.symbols = self.get_symbols(instruments)
+        self.symbols = DataLoader.load_symbols(db_conn=self.connection, instruments=instruments, start_time=start_time,
+                                               end_time=end_time)
 
         df_list = []
         for symbol in self.symbols:
-            df = DataLoader.load(db_conn=self.connection, symbol=symbol, start_time=start_time, end_time=end_time)
+            df = DataLoader.load_features(db_conn=self.connection, symbol=symbol, start_time=start_time,
+                                          end_time=end_time)
 
             # skip ticker of non-existed or small periods
             if df is None or df.shape[0] < min_periods:
@@ -54,17 +56,6 @@ class Dataset(abc.ABC):
         # random shuffle
         if shuffle:
             self.df = self.df.sample(frac=1)
-
-    def get_symbols(self, instruments):
-        symbols = []
-        with self.connection.cursor() as cursor:
-            # 查询指数内的股票代码
-            query = "SELECT DISTINCT(ts_code) FROM ts_idx_index_weight WHERE index_code='%s'" % instruments
-            cursor.execute(query)
-            for row in cursor:
-                list_row = list(row)
-                symbols.append(list_row[0])
-        return symbols
 
     def to_dataframe(self):
         return self.df

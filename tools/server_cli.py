@@ -29,7 +29,7 @@ def get_prediction(dataset):
 def predict(date):
     # input data
     start_time = datetime.datetime.strftime(
-        datetime.datetime.strptime(date, '%Y-%m-%d') - datetime.timedelta(days=60), '%Y-%m-%d')
+        datetime.datetime.strptime(date, '%Y-%m-%d') - datetime.timedelta(days=100), '%Y-%m-%d')
     end_time = date
     dataset = Dataset('000300.SH', start_time=start_time, end_time=end_time, min_periods=30,
                       handler=Alpha158(test_mode=True), shuffle=False)
