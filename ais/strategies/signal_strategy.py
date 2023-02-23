@@ -32,12 +32,7 @@ class TopkDropoutStrategy(abc.ABC):
         buy_order_list = []
 
         # load score
-        index = []
-        scores = []
-        for i, row in enumerate(df_prediction):
-            index.append(row['Symbol'])
-            scores.append(row['PREDICTION'])
-        pred_score = pd.DataFrame({'score': scores}, index=index)
+        pred_score = pd.DataFrame({'score': df_prediction['PREDICTION']}, index=[df_prediction['Symbol']])
 
         # last position (sorted by score)
         last = pred_score.reindex(self.current_stock_list).sort_values(by='score', ascending=False).index
