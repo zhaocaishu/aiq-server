@@ -14,7 +14,6 @@ class TopkDropoutStrategy(abc.ABC):
         self.buy_thresh = 0.01
         self.method_sell = 'bottom'
         self.method_buy = 'top'
-        self.reserve = 0.05  # 5% reserve capital
 
         # 当前持仓股票列表
         self.current_stock_list = []
@@ -32,7 +31,8 @@ class TopkDropoutStrategy(abc.ABC):
         buy_order_list = []
 
         # load score
-        pred_score = pd.DataFrame({'score': df_prediction['PREDICTION']}, index=[df_prediction['Symbol']])
+        pred_score = pd.DataFrame({'score': df_prediction['PREDICTION'].tolist()},
+                                  index=df_prediction['Symbol'].tolist())
 
         # last position (sorted by score)
         last = pred_score.reindex(self.current_stock_list).sort_values(by='score', ascending=False).index
