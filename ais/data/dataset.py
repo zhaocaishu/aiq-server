@@ -50,7 +50,7 @@ class Dataset(abc.ABC):
             df = df.iloc[-1:]
 
             if self._latest_date is None:
-                self._latest_date = df['Date'][0]
+                self._latest_date = df['Date'].values[0]
 
             df_list.append(df)
         # concat and reset index

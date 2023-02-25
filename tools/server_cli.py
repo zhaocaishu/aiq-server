@@ -22,7 +22,7 @@ model.load('/home/zcs/darrenwang/aiq/checkpoints')
 strategy = TopkDropoutStrategy()
 
 
-@app.route("/predict/date=<date>")
+@app.route("/predict?date=<date>")
 def predict(date):
     logger.info('input request: %s' % date)
     # input data
