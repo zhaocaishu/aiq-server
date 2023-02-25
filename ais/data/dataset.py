@@ -49,7 +49,7 @@ class Dataset(abc.ABC):
 
             df = df.iloc[-1:]
 
-            if self._latest_date is not None:
+            if self._latest_date is None:
                 self._latest_date = df['Date'][0]
 
             df_list.append(df)
