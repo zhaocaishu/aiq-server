@@ -15,19 +15,21 @@ class Dataset(abc.ABC):
     """
 
     def __init__(
-            self,
-            instruments,
-            start_time=None,
-            end_time=None,
-            min_periods=60,
-            handler=None,
-            shuffle=False
+        self,
+        instruments,
+        start_time=None,
+        end_time=None,
+        min_periods=60,
+        handler=None,
+        shuffle=False
     ):
         self.connection = mysql.connector.connect(host='127.0.0.1', user='zcs', passwd='mydaydayup2023!',
                                                   database="stock_info")
 
         self.symbols = DataLoader.load_symbols(db_conn=self.connection, instruments=instruments, start_time=start_time,
                                                end_time=end_time)
+
+        self._latest_date = None
 
         df_list = []
         for symbol in self.symbols:
@@ -46,6 +48,9 @@ class Dataset(abc.ABC):
                 df = handler.fetch(df)
 
             df = df.iloc[-1:]
+
+            if self._latest_date is not None:
+                self._latest_date = df['Date'][0]
 
             df_list.append(df)
         # concat and reset index
@@ -74,3 +79,7 @@ class Dataset(abc.ABC):
             df_symbol = self.df[self.df['Symbol'] == symbol]
             if df_symbol.shape[0] > 0:
                 df_symbol.to_csv(os.path.join(output_dir, symbol + '.csv'), na_rep='NaN', index=False)
+
+    @property
+    def latest_date(self):
+        return self._latest_date

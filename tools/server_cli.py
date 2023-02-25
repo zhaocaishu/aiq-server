@@ -38,7 +38,15 @@ def predict(date):
 
     # response
     buy_order_list, keep_order_list, sell_order_list = strategy.generate_trade_decision(prediction_result)
-    response = {'DATE': date, 'BUY': buy_order_list, 'SELL': sell_order_list}
+    response = {
+        "code": 0,
+        "msg": "OK",
+        "data": {
+            'date': dataset.latest_date,
+            'BUY': buy_order_list,
+            'SELL': sell_order_list
+        }
+    }
     return json.dumps(response)
 
 
