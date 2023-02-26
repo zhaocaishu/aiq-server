@@ -35,7 +35,7 @@ def predict():
     start_time = datetime.datetime.strftime(
         datetime.datetime.strptime(tradeDate, '%Y-%m-%d') - datetime.timedelta(days=100), '%Y-%m-%d')
     end_time = tradeDate
-    dataset = Dataset(instruments='000300.SH', start_time=start_time, end_time=end_time, min_periods=60,
+    dataset = Dataset(instruments='000852.SH', start_time=start_time, end_time=end_time, min_periods=60,
                       handler=Alpha158(test_mode=True), shuffle=False)
     logger.info('predict %d items' % dataset.to_dataframe().shape[0])
 
