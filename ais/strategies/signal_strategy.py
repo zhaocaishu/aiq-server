@@ -22,6 +22,8 @@ class TopkDropoutStrategy(abc.ABC):
         cur_position = cur_position.strip()
         if len(cur_position) > 0:
             self.current_stock_list = cur_position.split(',')
+        else:
+            self.current_stock_list = []
 
     def generate_trade_decision(self, df_prediction):
         def get_first_n(li, n):

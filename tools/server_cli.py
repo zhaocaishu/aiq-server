@@ -30,7 +30,7 @@ def predict():
         curPosition = request_dict['curPosition']
     else:
         curPosition = ''
-    logger.info('input request: %s, %s' % (tradeDate, curPosition))
+    logger.info('input request: trade date: %s, current position: %s' % (tradeDate, curPosition))
     # input data
     start_time = datetime.datetime.strftime(
         datetime.datetime.strptime(tradeDate, '%Y-%m-%d') - datetime.timedelta(days=100), '%Y-%m-%d')
