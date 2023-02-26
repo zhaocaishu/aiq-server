@@ -1,7 +1,7 @@
 import datetime
 import json
 
-from flask import Flask
+from flask import Flask, request
 
 from aiq.dataset import Alpha158
 from aiq.models import XGBModel
@@ -22,8 +22,14 @@ model.load('/home/zcs/darrenwang/aiq-server/checkpoints')
 strategy = TopkDropoutStrategy()
 
 
-@app.route("/predict/tradeDate=<tradeDate>&curPosition=<curPosition>")
-def predict(tradeDate, curPosition):
+@app.route("/predict/", methods=['GET'])
+def predict():
+    request_dict = request.args.to_dict()
+    tradeDate = request_dict['tradeDate']
+    if 'curPosition' in request_dict:
+        curPosition = request_dict['curPosition']
+    else:
+        curPosition = ''
     logger.info('input request: %s, %s' % (tradeDate, curPosition))
     # input data
     start_time = datetime.datetime.strftime(
