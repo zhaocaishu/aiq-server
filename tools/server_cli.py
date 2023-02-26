@@ -22,7 +22,7 @@ model.load('/home/zcs/darrenwang/aiq-server/checkpoints')
 strategy = TopkDropoutStrategy()
 
 
-@app.route("/predict/", methods=['GET'])
+@app.route("/predict", methods=['GET'])
 def predict():
     request_dict = request.args.to_dict()
     tradeDate = request_dict['tradeDate']

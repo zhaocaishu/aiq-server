@@ -8,8 +8,8 @@ class TopkDropoutStrategy(abc.ABC):
         """
         Top-k dropout strategy
         """
-        self.topk = 10
-        self.n_drop = 3
+        self.topk = 30
+        self.n_drop = 6
         self.hold_thresh = 1
         self.buy_thresh = 0.01
         self.method_sell = 'bottom'
