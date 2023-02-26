@@ -18,6 +18,11 @@ class TopkDropoutStrategy(abc.ABC):
         # 当前持仓股票列表
         self.current_stock_list = []
 
+    def set_current_stock_list(self, cur_position):
+        cur_position = cur_position.strip()
+        if len(cur_position) > 0:
+            self.current_stock_list = cur_position.split(',')
+
     def generate_trade_decision(self, df_prediction):
         def get_first_n(li, n):
             return list(li)[:n]

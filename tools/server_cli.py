@@ -16,19 +16,19 @@ logger = get_logger('Aiq Server')
 
 # load model
 model = XGBModel()
-model.load('/home/zcs/darrenwang/aiq/checkpoints')
+model.load('/home/zcs/darrenwang/aiq-server/checkpoints')
 
 # strategy
 strategy = TopkDropoutStrategy()
 
 
-@app.route("/predict/date=<date>")
-def predict(date):
-    logger.info('input request: %s' % date)
+@app.route("/predict/tradeDate=<tradeDate>&curPosition=<curPosition>")
+def predict(tradeDate, curPosition):
+    logger.info('input request: %s, %s' % (tradeDate, curPosition))
     # input data
     start_time = datetime.datetime.strftime(
-        datetime.datetime.strptime(date, '%Y-%m-%d') - datetime.timedelta(days=100), '%Y-%m-%d')
-    end_time = date
+        datetime.datetime.strptime(tradeDate, '%Y-%m-%d') - datetime.timedelta(days=100), '%Y-%m-%d')
+    end_time = tradeDate
     dataset = Dataset(instruments='000300.SH', start_time=start_time, end_time=end_time, min_periods=60,
                       handler=Alpha158(test_mode=True), shuffle=False)
     logger.info('predict %d items' % dataset.to_dataframe().shape[0])
@@ -37,14 +37,15 @@ def predict(date):
     prediction_result = model.predict(dataset).to_dataframe()
 
     # response
+    strategy.set_current_stock_list(curPosition)
     buy_order_list, keep_order_list, sell_order_list = strategy.generate_trade_decision(prediction_result)
     response = {
         "code": 0,
         "msg": "OK",
         "data": {
             'date': dataset.latest_date,
-            'BUY': buy_order_list,
-            'SELL': sell_order_list
+            'buy': buy_order_list,
+            'sell': sell_order_list
         }
     }
     return json.dumps(response)
