@@ -76,18 +76,6 @@ class Dataset(abc.ABC):
     def add_column(self, name: str, data: np.array):
         self.df[name] = data
 
-    def dump(self, output_dir: str = None):
-        if output_dir is None:
-            return
-
-        if not os.path.exists(path=output_dir):
-            os.makedirs(output_dir)
-
-        for symbol in self.symbols:
-            df_symbol = self.df[self.df['Symbol'] == symbol]
-            if df_symbol.shape[0] > 0:
-                df_symbol.to_csv(os.path.join(output_dir, symbol + '.csv'), na_rep='NaN', index=False)
-
     @property
     def latest_date(self):
         return self._latest_date

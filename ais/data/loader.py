@@ -46,8 +46,6 @@ class DataLoader(abc.ABC):
         symbols = []
         with db_conn.cursor() as cursor:
             # 查询指数内的股票代码
-            start_time = start_time.replace('-', '')
-            end_time = end_time.replace('-', '')
             query = "SELECT DISTINCT(ts_code) FROM ts_idx_index_weight WHERE index_code='%s' " \
                     "AND trade_date in (SELECT MAX(trade_date) FROM FROM ts_idx_index_weight WHERE index_code='%s')" % (
                         instruments, instruments)
