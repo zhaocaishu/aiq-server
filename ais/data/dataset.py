@@ -21,7 +21,7 @@ class Dataset(abc.ABC):
         end_time=None,
         min_periods=60,
         handler=None,
-        shuffle=False
+        adjust_price=True
     ):
         self.connection = mysql.connector.connect(host='127.0.0.1', user='zcs', passwd='mydaydayup2023!',
                                                   database="stock_info")
@@ -43,6 +43,10 @@ class Dataset(abc.ABC):
             # append ticker symbol
             df['Symbol'] = symbol
 
+            # adjust price with factor
+            if adjust_price:
+                df = self.adjust_price(df)
+
             # extract ticker factors
             if handler is not None:
                 df = handler.fetch(df)
@@ -53,14 +57,18 @@ class Dataset(abc.ABC):
                 self._latest_date = df['Date'].values[0]
 
             df_list.append(df)
+
         # concat and reset index
         self.df = pd.concat(df_list)
         self.df.reset_index(inplace=True)
         print('Loaded %d symbols to build dataset' % len(df_list))
 
-        # random shuffle
-        if shuffle:
-            self.df = self.df.sample(frac=1)
+    @staticmethod
+    def adjust_price(df):
+        price_cols = ['Open', 'High', 'Low', 'Close']
+        for col in price_cols:
+            df[col] = df[col] * df['Adj_factor']
+        return df
 
     def to_dataframe(self):
         return self.df
