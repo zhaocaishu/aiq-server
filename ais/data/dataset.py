@@ -26,8 +26,7 @@ class Dataset(abc.ABC):
         self.connection = mysql.connector.connect(host='127.0.0.1', user='zcs', passwd='mydaydayup2023!',
                                                   database="stock_info")
 
-        self.symbols = DataLoader.load_symbols(db_conn=self.connection, instruments=instruments, start_time=start_time,
-                                               end_time=end_time)
+        self.symbols = DataLoader.load_symbols(db_conn=self.connection, instruments=instruments)
 
         self._latest_date = None
 

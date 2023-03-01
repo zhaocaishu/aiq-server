@@ -42,7 +42,7 @@ class DataLoader(abc.ABC):
             return df
 
     @staticmethod
-    def load_symbols(db_conn, instruments, start_time=None, end_time=None):
+    def load_symbols(db_conn, instruments):
         symbols = []
         with db_conn.cursor() as cursor:
             # 查询指数内的股票代码
