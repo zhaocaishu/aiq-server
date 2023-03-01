@@ -19,7 +19,7 @@ class Dataset(abc.ABC):
         instruments,
         start_time=None,
         end_time=None,
-        min_periods=60,
+        min_periods=None,
         handler=None,
         adjust_price=True
     ):

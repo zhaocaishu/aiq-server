@@ -33,7 +33,7 @@ def predict():
     logger.info('input request: trade date: %s, current position: %s' % (tradeDate, curPosition))
     # input data
     start_time = datetime.datetime.strftime(
-        datetime.datetime.strptime(tradeDate, '%Y-%m-%d') - datetime.timedelta(days=72), '%Y-%m-%d')
+        datetime.datetime.strptime(tradeDate, '%Y-%m-%d') - datetime.timedelta(days=100), '%Y-%m-%d')
     end_time = tradeDate
     dataset = Dataset(instruments='000852.SH', start_time=start_time, end_time=end_time, min_periods=72,
                       handler=Alpha158(test_mode=True))
