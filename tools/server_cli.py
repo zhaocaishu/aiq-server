@@ -24,6 +24,7 @@ strategy = TopkDropoutStrategy()
 
 @app.route("/predict", methods=['GET'])
 def predict():
+    # request
     request_dict = request.args.to_dict()
     tradeDate = request_dict['tradeDate']
     if 'curPosition' in request_dict:
@@ -31,6 +32,7 @@ def predict():
     else:
         curPosition = ''
     logger.info('input request: trade date: %s, current position: %s' % (tradeDate, curPosition))
+
     # input data
     start_time = datetime.datetime.strftime(
         datetime.datetime.strptime(tradeDate, '%Y-%m-%d') - datetime.timedelta(days=120), '%Y-%m-%d')

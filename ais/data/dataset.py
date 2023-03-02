@@ -1,5 +1,4 @@
 import abc
-import os
 
 import numpy as np
 import pandas as pd
@@ -30,7 +29,7 @@ class Dataset(abc.ABC):
 
         self._latest_date = None
 
-        df_list = []
+        self.df = None
         for symbol in self.symbols:
             df = DataLoader.load_features(db_conn=self.connection, symbol=symbol, start_time=start_time,
                                           end_time=end_time)
@@ -55,12 +54,11 @@ class Dataset(abc.ABC):
             if self._latest_date is None:
                 self._latest_date = df['Date'].values[0]
 
-            df_list.append(df)
-
-        # concat and reset index
-        self.df = pd.concat(df_list)
+            if self.df is None:
+                self.df = df
+            else:
+                self.df = pd.concat([self.df, df], ignore_index=True)
         self.df.reset_index(inplace=True)
-        print('Loaded %d symbols to build dataset' % len(df_list))
 
     @staticmethod
     def adjust_price(df):
