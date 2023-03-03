@@ -29,7 +29,7 @@ class Dataset(abc.ABC):
 
         self._latest_date = None
 
-        self.df = None
+        dfs = []
         for symbol in self.symbols:
             df = DataLoader.load_features(db_conn=self.connection, symbol=symbol, start_time=start_time,
                                           end_time=end_time)
@@ -54,10 +54,9 @@ class Dataset(abc.ABC):
             if self._latest_date is None:
                 self._latest_date = df['Date'].values[0]
 
-            if self.df is None:
-                self.df = df
-            else:
-                self.df = pd.concat([self.df, df], ignore_index=True)
+            dfs.append(df)
+
+        self.df = pd.concat(dfs)
         self.df.reset_index(inplace=True)
 
     @staticmethod
