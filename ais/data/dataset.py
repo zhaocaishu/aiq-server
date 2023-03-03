@@ -48,10 +48,6 @@ class Dataset(abc.ABC):
                 df = handler.fetch(df)
 
             df = df.iloc[-1:]
-
-            if self._latest_date is None:
-                self._latest_date = df['Date'].values[0]
-
             dfs.append(df)
 
         self.df = pd.concat(dfs)
