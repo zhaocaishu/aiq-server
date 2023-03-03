@@ -27,8 +27,6 @@ class Dataset(abc.ABC):
 
         self.symbols = DataLoader.load_symbols(db_conn=self.connection, instruments=instruments)
 
-        self._latest_date = None
-
         dfs = []
         for symbol in self.symbols:
             df = DataLoader.load_features(db_conn=self.connection, symbol=symbol, start_time=start_time,
@@ -73,5 +71,5 @@ class Dataset(abc.ABC):
         self.df[name] = data
 
     @property
-    def latest_date(self):
-        return self._latest_date
+    def date(self):
+        return self.df['Date'].iloc[0]

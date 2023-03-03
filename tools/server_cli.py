@@ -51,7 +51,7 @@ def predict():
         "code": 0,
         "msg": "OK",
         "data": {
-            'date': dataset.latest_date,
+            'date': dataset.date,
             'buy': buy_order_list,
             'sell': sell_order_list
         }
