@@ -9,9 +9,8 @@ class TopkDropoutStrategy(abc.ABC):
         Top-k dropout strategy
         """
         self.topk = 30
-        self.n_drop = 6
+        self.n_drop = 3
         self.hold_thresh = 1
-        self.buy_thresh = 0.01
         self.method_sell = 'bottom'
         self.method_buy = 'top'
 
@@ -66,9 +65,7 @@ class TopkDropoutStrategy(abc.ABC):
         # Get the stock list we really want to buy and sell
         buy = today[:len(sell) + self.topk - len(last)]
         for code in buy:
-            score = pred_score['score'][code]
-            if score > self.buy_thresh:
-                buy_order_list.append(code)
+            buy_order_list.append(code)
 
         for code in self.current_stock_list:
             if code in sell:
