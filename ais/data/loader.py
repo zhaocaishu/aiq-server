@@ -46,9 +46,8 @@ class DataLoader(abc.ABC):
         symbols = []
         with db_conn.cursor() as cursor:
             # 查询指数内的股票代码
-            query = "SELECT DISTINCT(ts_code) FROM ts_idx_index_weight WHERE index_code='%s' " \
-                    "AND trade_date in (SELECT MAX(trade_date) FROM ts_idx_index_weight WHERE index_code='%s')" % (
-                        instruments, instruments)
+            query = "SELECT ts_code, industry FROM ts_basic_stock_list WHERE market in ('主板', '中小板') " \
+                    "AND list_status='L' AND DATEDIFF(NOW(), DATE_FORMAT(list_date, '%Y%m%d')) >= 360"
             cursor.execute(query)
             for row in cursor:
                 list_row = list(row)
