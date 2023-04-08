@@ -1,4 +1,5 @@
 import abc
+import datetime
 
 import numpy as np
 import pandas as pd
@@ -29,8 +30,10 @@ class Dataset(abc.ABC):
 
         dfs = []
         for symbol in self.symbols:
+            ext_end_time = datetime.datetime.strftime(
+                datetime.datetime.strptime(end_time, '%Y-%m-%d') + datetime.timedelta(days=10), '%Y-%m-%d')
             df = DataLoader.load_features(db_conn=self.connection, symbol=symbol, start_time=start_time,
-                                          end_time=end_time)
+                                          end_time=ext_end_time)
 
             # skip ticker of non-existed or small periods
             if df is None or df.shape[0] < min_periods:
@@ -47,7 +50,7 @@ class Dataset(abc.ABC):
             if handler is not None:
                 df = handler.fetch(df)
 
-            df = df.iloc[-1:]
+            df = df[df['Date'] <= end_time].iloc[-1:]
             dfs.append(df)
 
         self.df = pd.concat(dfs)
