@@ -23,7 +23,7 @@ def predict():
     tradeDate = request_dict['tradeDate']
     volumeThresh = request_dict.get('volumeThresh', 1.6)
     closeThresh = request_dict.get('closeThresh', 0.04)
-    returnThresh = request_dict.get('closeThresh', 0.05)
+    returnThresh = request_dict.get('returnThresh', 0.05)
     slopeThresh = request_dict.get('slopeThresh', 0.001)
     logger.info(
         'input request: trade date: %s, volume threshold: %s, close threshold: %s, return threshold: %s,'
