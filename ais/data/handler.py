@@ -1,6 +1,7 @@
 import abc
 
 import pandas as pd
+import numpy as np
 
 from aiq.ops import Ref, Mean
 
@@ -25,8 +26,17 @@ class Alpha158(DataHandler):
         volume = df['Volume']
 
         features = [volume / Mean(Ref(volume, 1), 30),
-                    close / Ref(close, 1) - 1]
-        names = ['VOLUME30', 'CLOSE1']
+                    close / Ref(close, 1) - 1,
+                    Ref(close, -5) / Ref(close, -1) - 1]
+        names = ['VOLUME30', 'CLOSE1', 'RETURN5']
+
+        window_size = 5
+        slopes = np.ones(close.shape[0], dtype=np.int32) * np.nan
+        for i in range(close.shape[0] - window_size):
+            window_prices = close.iloc[i:i + window_size].values
+            slopes[i] = np.polyfit(np.arange(window_size), window_prices / window_prices[0], deg=1)[0]
+        features.append(pd.Series(slopes))
+        names.append('SLOPE5')
 
         # concat all features and labels
         df = pd.concat(

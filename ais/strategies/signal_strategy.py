@@ -6,11 +6,11 @@ class TopkStrategy(abc.ABC):
         """
         Top-k strategy
         """
-        self.volume_thresh = 1.5
-        self.close_thresh = 0.04
+        pass
 
-    def generate_trade_decision(self, df_prediction):
-        valid = (df_prediction['VOLUME30'] > self.volume_thresh) & (df_prediction['CLOSE1'] > self.close_thresh)
-        buy_order_list = df_prediction[valid]['Symbol']
+    def generate_trade_decision(self, df, volume_thresh, close_thresh, return_thresh, slope_thresh):
+        valid = (df['VOLUME30'] > volume_thresh) & (df['CLOSE1'] > close_thresh) & (df['RETURN5'] > return_thresh) & (
+                    df['SLOPE5'] > slope_thresh)
+        buy_order_list = df[valid]['Symbol'].to_list()
 
         return buy_order_list
