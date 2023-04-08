@@ -42,11 +42,11 @@ class DataLoader(abc.ABC):
             return df
 
     @staticmethod
-    def load_symbols(db_conn, instruments):
+    def load_symbols(db_conn):
         symbols = []
         with db_conn.cursor() as cursor:
             # 查询指数内的股票代码
-            query = "SELECT ts_code, industry FROM ts_basic_stock_list WHERE market in ('主板', '中小板') " \
+            query = "SELECT ts_code, industry FROM ts_basic_stock_list WHERE market in ('主板', '中小板', '创业板', '科创板') " \
                     "AND list_status='L' AND DATEDIFF(NOW(), DATE_FORMAT(list_date, '%Y%m%d')) >= 360"
             cursor.execute(query)
             for row in cursor:
