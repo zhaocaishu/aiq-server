@@ -1,4 +1,4 @@
-from aiq.dataset.handler import Alpha158
+from ais.data.handler import Alpha158
 
 from ais.data.dataset import Dataset
 

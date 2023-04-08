@@ -3,23 +3,18 @@ import json
 
 from flask import Flask, request
 
-from aiq.dataset import Alpha158
-from aiq.models import XGBModel
 from aiq.utils.logging import get_logger
 
-from ais.strategies.signal_strategy import TopkDropoutStrategy
+from ais.strategies.signal_strategy import TopkStrategy
 from ais.data.dataset import Dataset
+from ais.data.handler import Alpha158
 
 
 app = Flask(__name__)
 logger = get_logger('Aiq Server')
 
-# load model
-model = XGBModel()
-model.load('/home/zcs/darrenwang/aiq-server/checkpoints')
-
 # strategy
-strategy = TopkDropoutStrategy()
+strategy = TopkStrategy()
 
 
 @app.route("/predict", methods=['GET'])
@@ -41,19 +36,14 @@ def predict():
                       handler=Alpha158(test_mode=True))
     logger.info('predict %d items' % dataset.to_dataframe().shape[0])
 
-    # predict
-    prediction_result = model.predict(dataset).to_dataframe()
-
     # response
-    strategy.set_current_stock_list(curPosition)
-    buy_order_list, keep_order_list, sell_order_list = strategy.generate_trade_decision(prediction_result)
+    buy_order_list = strategy.generate_trade_decision(dataset.to_dataframe())
     response = {
         "code": 0,
         "msg": "OK",
         "data": {
             'date': dataset.date,
-            'buy': buy_order_list,
-            'sell': sell_order_list
+            'buy': buy_order_list
         }
     }
     return json.dumps(response)
