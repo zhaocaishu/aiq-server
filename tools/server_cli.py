@@ -25,6 +25,7 @@ def predict():
     closeThresh = float(request_dict.get('closeThresh', 0.04))
     returnThresh = float(request_dict.get('returnThresh', 0.05))
     slopeThresh = float(request_dict.get('slopeThresh', 0.2))
+    targetCode = request_dict.get('targetCode', None)
     logger.info(
         'input request: trade date: %s, volume threshold: %s, close threshold: %s, return threshold: %s,'
         'slope threshold: %s' % (tradeDate, volumeThresh, closeThresh, returnThresh, slopeThresh))
@@ -35,6 +36,10 @@ def predict():
     end_time = tradeDate
     dataset = Dataset(start_time=start_time, end_time=end_time, min_periods=72, handler=Alpha158(test_mode=True))
     logger.info('predict %d items' % dataset.to_dataframe().shape[0])
+
+    if targetCode is not None:
+        df = dataset.to_dataframe()
+        print(df[df['Symbol'] == targetCode][['VOLUME30', 'CLOSE1', 'RETURN5', 'SLOPE5']])
 
     # response
     buy_order_list = strategy.generate_trade_decision(dataset.to_dataframe(), volumeThresh, closeThresh, returnThresh,
