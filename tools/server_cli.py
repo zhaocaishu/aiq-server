@@ -24,7 +24,10 @@ model = XGBModel()
 model.load('/home/zcs/darrenwang/aiq-server/checkpoints')
 
 # strategy
-strategy = TopkDropoutStrategy(connection=db_connection)
+strategy = TopkDropoutStrategy()
+
+# trade per interval days
+TRADE_INTERVAL_DAYS = 5
 
 
 def is_trade_day(input_date):
@@ -37,6 +40,19 @@ def is_trade_day(input_date):
         for _ in cursor:
             is_trade = True
     return is_trade
+
+
+def trade_day_count(start_date, end_date):
+    day_count = 0
+    start_date = start_date.replace('-', '')
+    end_date = end_date.replace('-', '')
+    with db_connection.cursor() as cursor:
+        query = "SELECT cal_date FROM ts_basic_trade_cal WHERE cal_date >= '%s' and cal_date <= '%s' and exchange " \
+                "= 'SSE' and is_open = 1" % (start_date, end_date)
+        cursor.execute(query)
+        for _ in cursor:
+            day_count += 1
+    return day_count
 
 
 @app.route("/predict", methods=['GET'])
@@ -58,6 +74,18 @@ def predict():
             "data": {}
         }
         return json.dumps(response)
+
+    # check trade interval days
+    prev_trade_date = strategy.current_trade_date
+    if prev_trade_date is not None:
+        interval_days = trade_day_count(prev_trade_date, tradeDate)
+        if interval_days <= TRADE_INTERVAL_DAYS:
+            response = {
+                "code": 1,
+                "msg": "%s is not a trading day" % tradeDate,
+                "data": {}
+            }
+            return json.dumps(response)
 
     # build dataset
     start_time = datetime.datetime.strftime(
