@@ -3,7 +3,7 @@ import abc
 import numpy as np
 import pandas as pd
 
-import mysql.connector
+from aiq.dataset import CSFillna, CSFilter
 
 from ais.data.loader import DataLoader
 
@@ -15,26 +15,22 @@ class Dataset(abc.ABC):
 
     def __init__(
         self,
+        connection,
         instruments,
         start_time=None,
         end_time=None,
-        min_periods=None,
-        handler=None,
+        handlers=None,
         adjust_price=True
     ):
-        self.connection = mysql.connector.connect(host='127.0.0.1', user='zcs', passwd='mydaydayup2023!',
-                                                  database="stock_info")
-
-        self.symbols = DataLoader.load_symbols(db_conn=self.connection, instruments=instruments)
-
         dfs = []
+        ts_handler, cs_handler = handlers
+        self.symbols = DataLoader.load_symbols(db_conn=connection, instruments=instruments)
         for symbol in self.symbols:
-            df = DataLoader.load_features(db_conn=self.connection, symbol=symbol, start_time=start_time,
+            df = DataLoader.load_features(db_conn=connection, symbol=symbol, start_time=start_time,
                                           end_time=end_time)
 
-            # skip ticker of non-existed or small periods
-            if df is None or df.shape[0] < min_periods:
-                continue
+            # skip ticker of non-existed
+            if df is None: continue
 
             # append ticker symbol
             df['Symbol'] = symbol
@@ -44,14 +40,38 @@ class Dataset(abc.ABC):
                 df = self.adjust_price(df)
 
             # extract ticker factors
-            if handler is not None:
-                df = handler.fetch(df)
+            if ts_handler is not None:
+                df = ts_handler.fetch(df)
 
-            df = df.iloc[-1:]
             dfs.append(df)
 
-        self.df = pd.concat(dfs)
+        # concat dataframes and set index
+        self.df = pd.concat(dfs, ignore_index=True)
+        self.df = self.df.set_index(['Date', 'Symbol'])
+
+        feature_names = []
+        if ts_handler is not None:
+            feature_names += ts_handler.feature_names
+
+        # handler for cross-sectional factor
+        if cs_handler is not None:
+            self.df = cs_handler.fetch(self.df)
+            feature_names += cs_handler.feature_names
+
+        # processors
+        if feature_names is not None:
+            processors = [
+                CSFillna(target_cols=feature_names),
+                CSFilter(target_cols=feature_names)
+            ]
+
+            for processor in processors:
+                self.df = processor(self.df)
+
+        # reset index
         self.df.reset_index(inplace=True)
+
+        self.df = self.df[self.df['Date'] == end_time]
 
     @staticmethod
     def adjust_price(df):
