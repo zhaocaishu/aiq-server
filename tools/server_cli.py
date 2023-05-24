@@ -27,17 +27,16 @@ model.load('/home/zcs/darrenwang/aiq-server/checkpoints')
 strategy = TopkDropoutStrategy(connection=db_connection)
 
 
-def to_trade_day(input_date):
-    trade_day = None
+def is_trade_day(input_date):
+    is_trade = False
     input_date = input_date.replace('-', '')
     with db_connection.cursor() as cursor:
-        query = "SELECT min(cal_date) FROM ts_basic_trade_cal WHERE cal_date >= '%s' and exchange = 'SSE' and is_open " \
+        query = "SELECT cal_date FROM ts_basic_trade_cal WHERE cal_date = '%s' and exchange = 'SSE' and is_open " \
                 "= 1" % input_date
         cursor.execute(query)
-        for row in cursor:
-            trade_day = row[0]
-            trade_day = datetime.datetime.strftime(datetime.datetime.strptime(trade_day, '%Y%m%d'), '%Y-%m-%d')
-    return trade_day
+        for _ in cursor:
+            is_trade = True
+    return is_trade
 
 
 @app.route("/predict", methods=['GET'])
@@ -51,16 +50,42 @@ def predict():
         curPosition = ''
     logger.info('input request: trade date: %s, current position: %s' % (tradeDate, curPosition))
 
+    # whether a trading day
+    if is_trade_day(tradeDate):
+        response = {
+            "code": 1,
+            "msg": "Date: %s is not a trading day" % tradeDate,
+            "data": {
+                'date': tradeDate,
+                'buy': [],
+                'sell': []
+            }
+        }
+        return json.dumps(response)
+
     # build dataset
     start_time = datetime.datetime.strftime(
         datetime.datetime.strptime(tradeDate, '%Y-%m-%d') - datetime.timedelta(days=120), '%Y-%m-%d')
-    end_time = to_trade_day(tradeDate)
+    end_time = tradeDate
     logger.info('input start time: %s, end time: %s' % (start_time, end_time))
 
     handlers = (Alpha158(test_mode=True), Alpha101(test_mode=True))
     dataset = Dataset(connection=db_connection, instruments='000852.SH', start_time=start_time, end_time=end_time,
                       handlers=handlers)
-    logger.info('predict %d items' % dataset.to_dataframe().shape[0])
+
+    if dataset.to_dataframe().shape[0] <= 0:
+        response = {
+            "code": 2,
+            "msg": "Data not exists at date: %s" % tradeDate,
+            "data": {
+                'date': tradeDate,
+                'buy': [],
+                'sell': []
+            }
+        }
+        return json.dumps(response)
+    else:
+        logger.info('predict %d items' % dataset.to_dataframe().shape[0])
 
     # predict
     prediction_result = model.predict(dataset).to_dataframe()
@@ -72,7 +97,7 @@ def predict():
         "code": 0,
         "msg": "OK",
         "data": {
-            'date': end_time,
+            'date': tradeDate,
             'buy': buy_order_list,
             'sell': sell_order_list
         }
