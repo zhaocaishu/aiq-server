@@ -55,11 +55,7 @@ def predict():
         response = {
             "code": 1,
             "msg": "Date: %s is not a trading day" % tradeDate,
-            "data": {
-                'date': tradeDate,
-                'buy': [],
-                'sell': []
-            }
+            "data": {}
         }
         return json.dumps(response)
 
@@ -77,11 +73,7 @@ def predict():
         response = {
             "code": 2,
             "msg": "Data not exists at date: %s" % tradeDate,
-            "data": {
-                'date': tradeDate,
-                'buy': [],
-                'sell': []
-            }
+            "data": {}
         }
         return json.dumps(response)
     else:
