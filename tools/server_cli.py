@@ -55,7 +55,8 @@ def predict():
         datetime.datetime.strptime(tradeDate, '%Y-%m-%d') - datetime.timedelta(days=120), '%Y-%m-%d')
     end_time = to_trade_day(tradeDate)
     handlers = (Alpha158(test_mode=True), Alpha101(test_mode=True))
-    dataset = Dataset(instruments='000852.SH', start_time=start_time, end_time=end_time, handlers=handlers)
+    dataset = Dataset(connection=db_connection, instruments='000852.SH', start_time=start_time, end_time=end_time,
+                      handlers=handlers)
     logger.info('predict %d items' % dataset.to_dataframe().shape[0])
 
     # predict
