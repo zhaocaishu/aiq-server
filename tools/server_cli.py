@@ -36,6 +36,7 @@ def to_trade_day(input_date):
         cursor.execute(query)
         for row in cursor:
             trade_day = row[0]
+            trade_day = datetime.datetime.strftime(datetime.datetime.strptime(trade_day, '%Y%m%d'), '%Y-%m-%d')
     return trade_day
 
 
@@ -54,6 +55,8 @@ def predict():
     start_time = datetime.datetime.strftime(
         datetime.datetime.strptime(tradeDate, '%Y-%m-%d') - datetime.timedelta(days=120), '%Y-%m-%d')
     end_time = to_trade_day(tradeDate)
+    logger.info('input start time: %s, end time: %s' % (start_time, end_time))
+
     handlers = (Alpha158(test_mode=True), Alpha101(test_mode=True))
     dataset = Dataset(connection=db_connection, instruments='000852.SH', start_time=start_time, end_time=end_time,
                       handlers=handlers)
