@@ -51,10 +51,10 @@ def predict():
     logger.info('input request: trade date: %s, current position: %s' % (tradeDate, curPosition))
 
     # whether a trading day
-    if is_trade_day(tradeDate):
+    if not is_trade_day(tradeDate):
         response = {
             "code": 1,
-            "msg": "Date: %s is not a trading day" % tradeDate,
+            "msg": "%s is not a trading day" % tradeDate,
             "data": {}
         }
         return json.dumps(response)
@@ -72,7 +72,7 @@ def predict():
     if dataset.to_dataframe().shape[0] <= 0:
         response = {
             "code": 2,
-            "msg": "Data not exists at date: %s" % tradeDate,
+            "msg": "Data not exists at %s" % tradeDate,
             "data": {}
         }
         return json.dumps(response)
