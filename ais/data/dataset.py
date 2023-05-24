@@ -58,6 +58,9 @@ class Dataset(abc.ABC):
             self.df = cs_handler.fetch(self.df)
             feature_names += cs_handler.feature_names
 
+        # current data
+        self.df = self.df.loc[[end_time]]
+
         # processors
         if feature_names is not None:
             processors = [
@@ -71,8 +74,6 @@ class Dataset(abc.ABC):
         # reset index
         self.df.reset_index(inplace=True)
 
-        self.df = self.df[self.df['Date'] == end_time]
-
     @staticmethod
     def adjust_price(df):
         price_cols = ['Open', 'High', 'Low', 'Close']
@@ -85,7 +86,3 @@ class Dataset(abc.ABC):
 
     def add_column(self, name: str, data: np.array):
         self.df[name] = data
-
-    @property
-    def date(self):
-        return self.df['Date'].iloc[0]
