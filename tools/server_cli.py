@@ -24,7 +24,7 @@ model = XGBModel()
 model.load('/home/zcs/darrenwang/aiq-server/checkpoints')
 
 # strategy
-strategy = TopkDropoutStrategy()
+strategy = TopkDropoutStrategy(connection=db_connection)
 
 
 def to_trade_day(input_date):
@@ -67,7 +67,7 @@ def predict():
 
     # response
     strategy.set_current_stock_list(curPosition)
-    buy_order_list, keep_order_list, sell_order_list = strategy.generate_trade_decision(prediction_result)
+    buy_order_list, sell_order_list = strategy.generate_trade_decision(end_time, prediction_result)
     response = {
         "code": 0,
         "msg": "OK",

@@ -1,20 +1,25 @@
 import abc
+import datetime
 
 import pandas as pd
 
 
 class TopkDropoutStrategy(abc.ABC):
-    def __init__(self):
+    def __init__(self, connection):
         """
         Top-k dropout strategy
         """
         self.topk = 30
-        self.n_drop = 3
+        self.n_drop = 10
         self.hold_thresh = 1
         self.method_sell = 'bottom'
         self.method_buy = 'top'
+        self.trade_day_interval = 5
+
+        self.db_connection = connection
 
         # 当前持仓股票列表
+        self.current_trade_date = None
         self.current_stock_list = []
 
     def set_current_stock_list(self, cur_position):
@@ -22,19 +27,40 @@ class TopkDropoutStrategy(abc.ABC):
         if len(cur_position) > 0:
             self.current_stock_list = cur_position.split(',')
         else:
+            self.current_trade_date = None
             self.current_stock_list = []
 
-    def generate_trade_decision(self, df_prediction):
+    def trade_day_count(self, start_date, end_date):
+        day_count = 0
+        start_date = start_date.replace('-', '')
+        end_date = end_date.replace('-', '')
+        with self.db_connection.cursor() as cursor:
+            query = "SELECT cal_date FROM ts_basic_trade_cal WHERE cal_date >= '%s' and cal_date <= '%s' and exchange " \
+                    "= 'SSE' and is_open = 1" % (start_date, end_date)
+            cursor.execute(query)
+            for _ in cursor:
+                day_count += 1
+        return day_count
+
+    def generate_trade_decision(self, trade_date, df_prediction):
+        # generate order list for this adjust date
+        sell_order_list = []
+        buy_order_list = []
+
+        # adjust stocks every n days
+        if self.current_trade_date is not None:
+            day_cnt = self.trade_day_count(self.current_trade_date, trade_date)
+            if day_cnt <= self.trade_day_interval:
+                return sell_order_list, buy_order_list
+
+        # set current trade date
+        self.current_trade_date = trade_date
+
         def get_first_n(li, n):
             return list(li)[:n]
 
         def get_last_n(li, n):
             return list(li)[-n:]
-
-        # generate order list for this adjust date
-        sell_order_list = []
-        keep_order_list = []
-        buy_order_list = []
 
         # load score
         pred_score = pd.DataFrame({'score': df_prediction['PREDICTION'].tolist()},
@@ -70,10 +96,8 @@ class TopkDropoutStrategy(abc.ABC):
         for code in self.current_stock_list:
             if code in sell:
                 sell_order_list.append(code)
-            else:
-                keep_order_list.append(code)
 
-        # Get current stock list
-        self.current_stock_list = buy_order_list + keep_order_list
+        # Get current stock list and trade date
+        self.current_stock_list = list(set(self.current_stock_list) - set(sell_order_list)) + buy_order_list
 
-        return buy_order_list, keep_order_list, sell_order_list
+        return buy_order_list, sell_order_list
