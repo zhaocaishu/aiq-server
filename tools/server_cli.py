@@ -76,9 +76,9 @@ def predict():
         return json.dumps(response)
 
     # check trade interval days
-    prev_trade_date = strategy.current_trade_date
-    if prev_trade_date is not None:
-        interval_days = trade_day_count(prev_trade_date, tradeDate)
+    strategy.set_current_stock_list(curPosition)
+    if strategy.current_trade_date is not None:
+        interval_days = trade_day_count(strategy.current_trade_date, tradeDate)
         if interval_days <= TRADE_INTERVAL_DAYS:
             response = {
                 "code": 1,
@@ -111,7 +111,6 @@ def predict():
     prediction_result = model.predict(dataset).to_dataframe()
 
     # response
-    strategy.set_current_stock_list(curPosition)
     buy_order_list, sell_order_list = strategy.generate_trade_decision(end_time, prediction_result)
     response = {
         "code": 0,
