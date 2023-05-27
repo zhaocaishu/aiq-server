@@ -1,8 +1,10 @@
 import datetime
 import json
+from typing import Optional
 
 import mysql.connector
-from flask import Flask, request
+import uvicorn
+from fastapi import FastAPI
 
 from aiq.dataset import Alpha158, Alpha101
 from aiq.models import XGBModel
@@ -11,18 +13,11 @@ from aiq.utils.logging import get_logger
 from ais.strategies.signal_strategy import TopkDropoutStrategy
 from ais.data.dataset import Dataset
 
-app = Flask(__name__)
+# app
+app = FastAPI()
+
+# logger
 logger = get_logger('Aiq Server')
-
-# build db connection
-db_connection = mysql.connector.connect(host='127.0.0.1', user='zcs', passwd='mydaydayup2023!', database="stock_info")
-
-# load model
-model = XGBModel()
-model.load('/home/zcs/darrenwang/aiq-server/checkpoints')
-
-# strategy
-strategy = TopkDropoutStrategy()
 
 # trade per interval days
 TRADE_INTERVAL_DAYS = 5
@@ -66,15 +61,10 @@ def get_trade_day_intervals(start_date, end_date):
     return day_intervals
 
 
-@app.route("/predict", methods=['GET'])
-def predict():
+@app.get("/predict")
+async def predict(tradeDate: str, curPosition: Optional[str] = ''):
+    global db_connection, model, strategy
     # request
-    request_dict = request.args.to_dict()
-    tradeDate = request_dict['tradeDate']
-    if 'curPosition' in request_dict:
-        curPosition = request_dict['curPosition']
-    else:
-        curPosition = ''
     logger.info('input request: trade date: %s, current position: %s' % (tradeDate, curPosition))
 
     # whether a trading day
@@ -127,4 +117,16 @@ def predict():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=9000)
+    # db connection
+    db_connection = mysql.connector.connect(host='127.0.0.1', user='zcs', passwd='mydaydayup2023!',
+                                            database="stock_info")
+
+    # model
+    model = XGBModel()
+    model.load('/home/zcs/darrenwang/aiq-server/checkpoints')
+
+    # strategy
+    strategy = TopkDropoutStrategy()
+
+    # run
+    uvicorn.run(app, host='0.0.0.0', port=9000, workers=1)
