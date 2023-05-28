@@ -13,14 +13,14 @@ from aiq.utils.logging import get_logger
 from ais.strategies.signal_strategy import TopkDropoutStrategy
 from ais.data.dataset import Dataset
 
+# trade per interval days
+TRADE_INTERVAL_DAYS = 5
+
 # app
 app = FastAPI()
 
 # logger
 logger = get_logger('Aiq Server')
-
-# trade per interval days
-TRADE_INTERVAL_DAYS = 5
 
 
 def is_tradable_day(input_date):
@@ -74,7 +74,7 @@ async def predict(tradeDate: str, curPosition: Optional[str] = ''):
             "msg": "%s is not a tradable day" % tradeDate,
             "data": {}
         }
-        return json.dumps(response)
+        return response
 
     # check trade interval days
     strategy.set_current_stock_list(curPosition)
@@ -86,7 +86,7 @@ async def predict(tradeDate: str, curPosition: Optional[str] = ''):
                 "msg": "%s is not a tradable day" % tradeDate,
                 "data": {}
             }
-            return json.dumps(response)
+            return response
 
     # build dataset
     start_time = datetime.datetime.strftime(
@@ -113,7 +113,7 @@ async def predict(tradeDate: str, curPosition: Optional[str] = ''):
             'sell': sell_order_list
         }
     }
-    return json.dumps(response)
+    return response
 
 
 if __name__ == '__main__':
