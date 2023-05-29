@@ -26,7 +26,7 @@ def is_tradable_day(input_date):
                 "= 1" % input_date
         cursor.execute(query)
         rst = cursor.fetchone()
-        is_tradable = True if len(rst) > 0 else False
+        is_tradable = True if rst is not None else False
     return is_tradable
 
 
