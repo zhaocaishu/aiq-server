@@ -1,5 +1,4 @@
 import datetime
-import json
 from typing import Optional
 
 import mysql.connector
@@ -19,51 +18,45 @@ TRADE_INTERVAL_DAYS = 5
 # app
 app = FastAPI()
 
-# logger
-logger = get_logger('Aiq Server')
-
 
 def is_tradable_day(input_date):
-    is_tradable = False
     input_date = input_date.replace('-', '')
     with db_connection.cursor() as cursor:
         query = "SELECT cal_date FROM ts_basic_trade_cal WHERE cal_date = '%s' and exchange = 'SSE' and is_open " \
                 "= 1" % input_date
         cursor.execute(query)
-        for _ in cursor:
-            is_tradable = True
+        rst = cursor.fetchone()
+        is_tradable = True if len(rst) > 0 else False
     return is_tradable
 
 
-def get_last_trade_day(input_date):
-    last_trade_day = None
+def get_last_trade_date(input_date):
     input_date = input_date.replace('-', '')
     with db_connection.cursor() as cursor:
         query = "SELECT MAX(cal_date) FROM ts_basic_trade_cal WHERE cal_date < '%s' and exchange = 'SSE' and is_open " \
                 "= 1" % input_date
         cursor.execute(query)
-        for row in cursor:
-            last_trade_day = row[0]
-    last_trade_day = datetime.datetime.strftime(datetime.datetime.strptime(last_trade_day, '%Y%m%d'), '%Y-%m-%d')
-    return last_trade_day
+        rst = cursor.fetchone()
+        last_trade_date = rst[0]
+    last_trade_date = datetime.datetime.strftime(datetime.datetime.strptime(last_trade_date, '%Y%m%d'), '%Y-%m-%d')
+    return last_trade_date
 
 
 def get_trade_day_intervals(start_date, end_date):
-    day_intervals = 0
     start_date = start_date.replace('-', '')
     end_date = end_date.replace('-', '')
     with db_connection.cursor() as cursor:
-        query = "SELECT cal_date FROM ts_basic_trade_cal WHERE cal_date >= '%s' and cal_date <= '%s' and exchange " \
-                "= 'SSE' and is_open = 1" % (start_date, end_date)
+        query = "SELECT COUNT(cal_date) FROM ts_basic_trade_cal WHERE cal_date >= '%s' and cal_date <= '%s' and " \
+                "exchange = 'SSE' and is_open = 1" % (start_date, end_date)
         cursor.execute(query)
-        for _ in cursor:
-            day_intervals += 1
+        rst = cursor.fetchone()
+        day_intervals = rst[0]
     return day_intervals
 
 
 @app.get("/predict")
 async def predict(tradeDate: str, curPosition: Optional[str] = ''):
-    global db_connection, model, strategy
+    global logger, db_connection, model, strategy
     # request
     logger.info('input request: trade date: %s, current position: %s' % (tradeDate, curPosition))
 
@@ -91,7 +84,7 @@ async def predict(tradeDate: str, curPosition: Optional[str] = ''):
     # build dataset
     start_time = datetime.datetime.strftime(
         datetime.datetime.strptime(tradeDate, '%Y-%m-%d') - datetime.timedelta(days=120), '%Y-%m-%d')
-    end_time = get_last_trade_day(tradeDate)
+    end_time = get_last_trade_date(tradeDate)
     logger.info('input dataset start time: %s, end time: %s' % (start_time, end_time))
 
     handlers = (Alpha158(test_mode=True), Alpha101(test_mode=True))
@@ -117,6 +110,9 @@ async def predict(tradeDate: str, curPosition: Optional[str] = ''):
 
 
 if __name__ == '__main__':
+    # logger
+    logger = get_logger('Aiq Service')
+
     # db connection
     db_connection = mysql.connector.connect(host='127.0.0.1', user='zcs', passwd='mydaydayup2023!',
                                             database="stock_info")
