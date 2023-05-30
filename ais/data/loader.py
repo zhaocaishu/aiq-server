@@ -11,6 +11,7 @@ class DataLoader(abc.ABC):
     @staticmethod
     def load_features(db_conn, symbol, timestamp_col='Date', start_time=None, end_time=None) -> pd.DataFrame:
         # 查询数据
+        features = []
         with db_conn.cursor() as cursor:
             start_time = start_time.replace('-', '')
             end_time = end_time.replace('-', '')
@@ -30,16 +31,15 @@ class DataLoader(abc.ABC):
                         symbol, start_time, end_time)
 
             cursor.execute(query)
-            features = []
             for row in cursor:
                 feature = list(row)
                 t_date = feature[1]
                 feature[1] = t_date[0:4] + '-' + t_date[4:6] + '-' + t_date[6:8]
                 features.append(feature)
 
-            df = pd.DataFrame(features, columns=header)
-            df = df.sort_values(by=timestamp_col, ascending=True)
-            return df
+        df = pd.DataFrame(features, columns=header)
+        df = df.sort_values(by=timestamp_col, ascending=True)
+        return df
 
     @staticmethod
     def load_symbols(db_conn, instruments):
