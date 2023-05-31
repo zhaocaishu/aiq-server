@@ -30,6 +30,7 @@ async def predict(tradeDate: str, curPosition: Optional[str] = ''):
     db_connection = mysql.connector.connect(host='127.0.0.1', user='zcs', passwd='mydaydayup2023!',
                                             database="stock_info")
     trade_exchange = TradeExchange(db_connection=db_connection)
+    logger.info('trade exchange: db connection and trade exchange started')
 
     # whether a trading day
     if not trade_exchange.is_tradable_day(tradeDate):
@@ -56,15 +57,19 @@ async def predict(tradeDate: str, curPosition: Optional[str] = ''):
     start_time = datetime.datetime.strftime(
         datetime.datetime.strptime(tradeDate, '%Y-%m-%d') - datetime.timedelta(days=120), '%Y-%m-%d')
     end_time = trade_exchange.get_last_trade_date(tradeDate)
-    logger.info('input dataset start time: %s, end time: %s' % (start_time, end_time))
+    logger.info('dataset: start time: %s, end time: %s' % (start_time, end_time))
 
     handlers = (Alpha158(test_mode=True), Alpha101(test_mode=True))
     dataset = Dataset(connection=db_connection, instruments='000852.SH', start_time=start_time, end_time=end_time,
                       handlers=handlers)
-    logger.info('predict %d items' % dataset.to_dataframe().shape[0])
+    logger.info('dataset: loaded %d items' % dataset.to_dataframe().shape[0])
+
+    # close db connection
+    db_connection.close()
 
     # predict
     prediction_result = model.predict(dataset).to_dataframe()
+    logger.info('model: predicted successfully')
 
     # response
     buy_order_list, sell_order_list = strategy.generate_trade_decision(tradeDate, prediction_result)
@@ -77,9 +82,7 @@ async def predict(tradeDate: str, curPosition: Optional[str] = ''):
             'sell': sell_order_list
         }
     }
-
-    # close db connection
-    db_connection.close()
+    logger.info('strategy: trade decision has been generated')
 
     return response
 
