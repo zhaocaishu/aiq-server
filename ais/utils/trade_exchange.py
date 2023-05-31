@@ -2,12 +2,12 @@ import datetime
 
 
 class TradeExchange:
-    def __init__(self, db_connection):
-        self.db_connection = db_connection
+    def __init__(self, connection):
+        self.connection = connection
 
     def is_tradable_day(self, input_date):
         input_date = input_date.replace('-', '')
-        with self.db_connection.cursor() as cursor:
+        with self.connection.cursor() as cursor:
             query = "SELECT cal_date FROM ts_basic_trade_cal WHERE cal_date = '%s' and exchange = 'SSE' and is_open " \
                     "= 1" % input_date
             cursor.execute(query)
@@ -17,7 +17,7 @@ class TradeExchange:
 
     def get_last_trade_date(self, input_date):
         input_date = input_date.replace('-', '')
-        with self.db_connection.cursor() as cursor:
+        with self.connection.cursor() as cursor:
             query = "SELECT MAX(cal_date) FROM ts_basic_trade_cal WHERE cal_date < '%s' and exchange = 'SSE' and " \
                     "is_open = 1" % input_date
             cursor.execute(query)
@@ -29,7 +29,7 @@ class TradeExchange:
     def get_trade_day_intervals(self, start_date, end_date):
         start_date = start_date.replace('-', '')
         end_date = end_date.replace('-', '')
-        with self.db_connection.cursor() as cursor:
+        with self.connection.cursor() as cursor:
             query = "SELECT COUNT(cal_date) FROM ts_basic_trade_cal WHERE cal_date >= '%s' and cal_date <= '%s' and " \
                     "exchange = 'SSE' and is_open = 1" % (start_date, end_date)
             cursor.execute(query)

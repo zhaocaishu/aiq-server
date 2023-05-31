@@ -29,28 +29,40 @@ async def predict(tradeDate: str, curPosition: Optional[str] = ''):
     # open db connection
     db_connection = mysql.connector.connect(host='127.0.0.1', user='zcs', passwd='mydaydayup2023!',
                                             database="stock_info")
-    trade_exchange = TradeExchange(db_connection=db_connection)
+    trade_exchange = TradeExchange(connection=db_connection)
     logger.info('trade exchange: db connection and trade exchange started')
 
-    # whether a trading day
+    # check tradable date
     if not trade_exchange.is_tradable_day(tradeDate):
+        # response
         response = {
             "code": 1,
             "msg": "%s is not a tradable day" % tradeDate,
             "data": {}
         }
+
+        # close db connection
+        db_connection.close()
+
         return response
 
-    # check trade interval days
+    # set current positions
     strategy.set_current_stock_list(curPosition)
+
+    # check trade interval days
     if strategy.current_trade_date is not None:
         interval_days = trade_exchange.get_trade_day_intervals(strategy.current_trade_date, tradeDate)
         if interval_days <= TRADE_INTERVAL_DAYS:
+            # response
             response = {
                 "code": 1,
                 "msg": "%s is not a tradable day" % tradeDate,
                 "data": {}
             }
+
+            # close db connection
+            db_connection.close()
+
             return response
 
     # build dataset
@@ -63,9 +75,6 @@ async def predict(tradeDate: str, curPosition: Optional[str] = ''):
     dataset = Dataset(connection=db_connection, instruments='000852.SH', start_time=start_time, end_time=end_time,
                       handlers=handlers)
     logger.info('dataset: loaded %d items' % dataset.to_dataframe().shape[0])
-
-    # close db connection
-    db_connection.close()
 
     # predict
     prediction_result = model.predict(dataset).to_dataframe()
@@ -83,6 +92,9 @@ async def predict(tradeDate: str, curPosition: Optional[str] = ''):
         }
     }
     logger.info('strategy: trade decision has been generated')
+
+    # close db connection
+    db_connection.close()
 
     return response
 
