@@ -68,7 +68,7 @@ async def predict(tradeDate: str, curPosition: Optional[str] = ''):
     # build dataset
     start_time = datetime.datetime.strftime(
         datetime.datetime.strptime(tradeDate, '%Y-%m-%d') - datetime.timedelta(days=120), '%Y-%m-%d')
-    end_time = trade_exchange.get_last_trade_date(tradeDate)
+    end_time = trade_exchange.get_trade_date(tradeDate)
     logger.info('dataset: start time: %s, end time: %s' % (start_time, end_time))
 
     handlers = (Alpha158(test_mode=True), Alpha101(test_mode=True))

@@ -15,7 +15,7 @@ class TradeExchange:
             is_tradable = True if rst is not None else False
         return is_tradable
 
-    def get_last_trade_date(self, input_date):
+    def get_trade_date(self, input_date):
         input_date = input_date.replace('-', '')
         with self.connection.cursor() as cursor:
             query = "SELECT MAX(cal_date) FROM ts_basic_trade_cal WHERE cal_date < '%s' and exchange = 'SSE' and " \
