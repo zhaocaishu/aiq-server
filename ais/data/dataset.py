@@ -3,9 +3,8 @@ import abc
 import numpy as np
 import pandas as pd
 
-from aiq.dataset import CSFillna, CSFilter
-
 from ais.data.loader import DataLoader
+from ais.data.processor import CSFillna, CSFilter
 
 
 class Dataset(abc.ABC):
