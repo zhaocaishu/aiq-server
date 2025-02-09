@@ -23,7 +23,7 @@ async def predict(tradeDate: str, instrument: str):
 
     # open db connection
     db_connection = mysql.connector.connect(
-        host="127.0.0.1", user="zcs", passwd="mydaydayup2023!", database="stock_info"
+        host="127.0.0.1", user="zcs", passwd="2025zcsdaydayup", database="stock_info"
     )
 
     # build dataset
