@@ -22,7 +22,7 @@ setup(
     )),
     author="darrenwang",
     author_email="wangyang9113@gmail.com",
-    description="aiq-server",
+    description="aiq-cli",
     long_description=readme(),
     long_description_content_type="text/markdown",
     classifiers=[
