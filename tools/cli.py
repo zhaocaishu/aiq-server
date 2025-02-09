@@ -5,9 +5,8 @@ import uvicorn
 from fastapi import FastAPI
 import mysql.connector
 
-from aiq.utils.logging import get_logger
-
 from aic.data.loader import DataLoader
+from aic.utils.logging import get_logger
 
 
 # app
