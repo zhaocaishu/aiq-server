@@ -59,7 +59,7 @@ async def predict(tradeDate: str, instrument: str):
     response = {
         "code": 0,
         "msg": "OK",
-        "data": {"date": tradeDate, "preds": preds, "probs": probs},
+        "data": {"date": tradeDate, "preds": preds.tolist(), "probs": probs.tolist()},
     }
     logger.info("Reponse: %s" % str(response))
 
